@@ -62,7 +62,7 @@ func main() {
 		for e := range events {
 			_ = e
 			// if you want to see why things are broken
-			// fmt.Println("Event: ", e)
+			fmt.Println("Event: ", e)
 		}
 	}()
 	results := make([][]peer.ID, len(bspis))
