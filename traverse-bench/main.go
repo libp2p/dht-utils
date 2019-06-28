@@ -105,6 +105,9 @@ func RunSingleCrawl(ctx context.Context, k string, bootstrap []*peer.AddrInfo) (
 		}
 	}
 
+	// give the dht some breathing room to receive the identify events.
+	time.Sleep(5 * time.Second)
+
 	peers, err := d.GetClosestPeers(ctx, k)
 	if err != nil {
 		return nil, nil, err
