@@ -8,19 +8,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ipfs/go-ipfs/namesys"
-	"github.com/ipfs/go-ipfs/path"
-
 	proto "github.com/gogo/protobuf/proto"
 	dstore "github.com/ipfs/go-datastore"
 	dsync "github.com/ipfs/go-datastore/sync"
+	ipns "github.com/ipfs/go-ipns"
 	writer "github.com/ipfs/go-log/writer"
+	"github.com/ipfs/go-path"
 	"github.com/libp2p/go-libp2p"
-	ic "github.com/libp2p/go-libp2p-crypto"
-	"github.com/libp2p/go-libp2p-host"
+	ic "github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p-core/host"
+	peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-kad-dht"
-	peer "github.com/libp2p/go-libp2p-peer"
-	pstore "github.com/libp2p/go-libp2p-peerstore"
 	"github.com/libp2p/go-libp2p-record"
 	ma "github.com/multiformats/go-multiaddr"
 )
@@ -44,7 +42,7 @@ func getRecordFromKey(sk ic.PrivKey) (peer.ID, []byte) {
 		panic(err)
 	}
 
-	e, err := namesys.CreateRoutingEntryData(sk, pathval, 1, time.Now().Add(time.Hour*70))
+	e, err := ipns.Create(sk, []byte(pathval), 1, time.Now().Add(time.Hour*70), time.Hour)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +68,7 @@ func setupNode(ctx context.Context) (host.Host, *dht.IpfsDHT) {
 
 	validator := record.NamespacedValidator{
 		"pk":   record.PublicKeyValidator{},
-		"ipns": namesys.IpnsValidator{KeyBook: h.Peerstore()},
+		"ipns": ipns.Validator{KeyBook: h.Peerstore()},
 	}
 	rt.Validator = validator
 
@@ -84,7 +82,7 @@ func setupNode(ctx context.Context) (host.Host, *dht.IpfsDHT) {
 				panic(err)
 			}
 
-			pinfo, err := pstore.InfoFromP2pAddr(a)
+			pinfo, err := peer.AddrInfoFromP2pAddr(a)
 			if err != nil {
 				panic(err)
 			}
