@@ -7,7 +7,7 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
-	notif "github.com/libp2p/go-libp2p-routing/notifications"
+	routing "github.com/libp2p/go-libp2p-core/routing"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-kad-dht"
@@ -41,7 +41,6 @@ func computeQueryOverlapScore(peers [][]peer.ID) []int {
 }
 
 func main() {
-
 	var bspis []*peer.AddrInfo
 	for _, a := range bsaddrs {
 		maddr, err := ma.NewMultiaddr(a)
@@ -57,7 +56,7 @@ func main() {
 
 	ctx := context.Background()
 
-	ctx, events := notif.RegisterForQueryEvents(ctx)
+	ctx, events := routing.RegisterForQueryEvents(ctx)
 	go func() {
 		for e := range events {
 			_ = e
@@ -114,9 +113,7 @@ func RunSingleCrawl(ctx context.Context, k string, bootstrap []*peer.AddrInfo) (
 	}
 
 	var closest []peer.ID
-	for p := range peers {
-		closest = append(closest, p)
-	}
+	closest = append(closest, peers...)
 
 	var successDials []peer.AddrInfo
 	for _, c := range h.Network().Conns() {
