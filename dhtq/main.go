@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	ggio "github.com/gogo/protobuf/io"
 	cid "github.com/ipfs/go-cid"
 	libp2p "github.com/libp2p/go-libp2p"
-	host "github.com/libp2p/go-libp2p-host"
-	dhtopts "github.com/libp2p/go-libp2p-kad-dht/opts"
+	host "github.com/libp2p/go-libp2p-core/host"
+	peer "github.com/libp2p/go-libp2p-core/peer"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	dhtpb "github.com/libp2p/go-libp2p-kad-dht/pb"
-	peer "github.com/libp2p/go-libp2p-peer"
-	pstore "github.com/libp2p/go-libp2p-peerstore"
 	ma "github.com/multiformats/go-multiaddr"
 	cli "github.com/urfave/cli"
 )
@@ -30,7 +30,7 @@ func setup(ctx context.Context, arg string) error {
 	fmt.Printf("my peer ID is %s\n", h.ID().Pretty())
 
 	parts := strings.Split(arg, "/ipfs/")
-	pid, err = peer.IDB58Decode(parts[1])
+	pid, err = peer.Decode(parts[1])
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func setup(ctx context.Context, arg string) error {
 		return err
 	}
 
-	pi := pstore.PeerInfo{
+	pi := peer.AddrInfo{
 		ID:    pid,
 		Addrs: []ma.Multiaddr{addr},
 	}
@@ -55,8 +55,10 @@ func setup(ctx context.Context, arg string) error {
 	return nil
 }
 
-var mhost host.Host
-var pid peer.ID
+var (
+	mhost host.Host
+	pid   peer.ID
+)
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -82,7 +84,7 @@ func main() {
 		}
 
 		bef := time.Now()
-		s, err := mhost.NewStream(ctx, pid, dhtopts.ProtocolDHT)
+		s, err := mhost.NewStream(ctx, pid, dht.ProtocolDHT)
 		if err != nil {
 			return err
 		}
@@ -153,7 +155,7 @@ func main() {
 		bef = time.Now()
 		for i := 0; i < n; i++ {
 			sends = append(sends, time.Now())
-			pmes := dhtpb.NewMessage(dhtpb.Message_MessageType(typ), key, 0)
+			pmes := dhtpb.NewMessage(dhtpb.Message_MessageType(typ), []byte(key), 0)
 			if err := w.WriteMsg(pmes); err != nil {
 				panic(err)
 			}
@@ -165,5 +167,5 @@ func main() {
 		return nil
 	}
 
-	app.RunAndExitOnError()
+	app.Run(os.Args)
 }
