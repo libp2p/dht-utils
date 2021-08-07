@@ -1,6 +1,6 @@
 module github.com/libp2p/dht-utils
 
-go 1.12
+go 1.15
 
 require (
 	github.com/gogo/protobuf v1.3.2
