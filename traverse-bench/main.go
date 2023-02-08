@@ -10,7 +10,7 @@ import (
 	routing "github.com/libp2p/go-libp2p-core/routing"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-kad-dht"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
