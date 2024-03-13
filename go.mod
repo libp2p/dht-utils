@@ -2,7 +2,6 @@ module github.com/libp2p/dht-utils
 
 go 1.21
 
-
 require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/ipfs/go-cid v0.0.7
